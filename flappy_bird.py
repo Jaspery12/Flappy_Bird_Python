@@ -1,3 +1,4 @@
+import random
 import pygame
 from sys import exit 
 
@@ -52,12 +53,23 @@ def draw():
     window.blit(pipe.img, pipe)
   
 def create_pipes():
+  random_pipe_y = pipe_y - pipe_height/4 - random.random()*(pipe_height/2)
+  opening_space = WINDOW_HEIGHT/4
+  
   top_pipe = Pipe(top_pipe_image)
+  top_pipe.y = random_pipe_y
   pipes.append(top_pipe)
   
+  bottom_pipe = Pipe(bottom_pipe_image)
+  bottom_pipe.y = top_pipe.y + top_pipe.height + opening_space
+  pipes.append(bottom_pipe)
+
 def move():
   for pipe in pipes:
     pipe.x += velocity_x
+    
+  while len(pipes) > 0 and pipes[0].x < -pipe_width:
+    pipes.pop(0)
 
 
 #Window
