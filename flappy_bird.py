@@ -44,6 +44,10 @@ bottom_pipe_image = pygame.transform.scale(bottom_pipe_image, (pipe_width, pipe_
 bird = Bird(bird_image)
 pipes = []
 velocity_x = -2
+velocity_y = 0 
+gravity = 0.4
+score = 0
+game_over = False
 
 def draw():
   window.blit(background_image, (0,0))
@@ -51,7 +55,24 @@ def draw():
   
   for pipe in pipes:
     window.blit(pipe.img, pipe)
-  
+  if game_over:
+    game_over_str = "Game Over!"
+    text_str = "You Scored: " + str(int(score)) 
+    retry_str = "Press space to retry"
+    text_font = pygame.font.SysFont("Comic Sans MS", 35)
+    gameover_render = text_font.render(game_over_str, True, "red")
+    text_render = text_font.render(text_str, True, "white")
+    retry_render = text_font.render(retry_str, True, "white")
+    window.blit(gameover_render, (5, 0))
+    window.blit(text_render, (5, 40))
+    window.blit(retry_render, (5, 80))
+    
+  else:     
+    text_str = "Score: " + str(int(score))  
+    text_font = pygame.font.SysFont("Comic Sans MS", 35)
+    text_render = text_font.render(text_str, True, "white")
+    window.blit(text_render, (5,0))
+    
 def create_pipes():
   random_pipe_y = pipe_y - pipe_height/4 - random.random()*(pipe_height/2)
   opening_space = WINDOW_HEIGHT/4
@@ -65,8 +86,25 @@ def create_pipes():
   pipes.append(bottom_pipe)
 
 def move():
+  global velocity_y, score, game_over
+  velocity_y += gravity
+  bird.y += velocity_y
+  bird.y = max(bird.y, 0)
+  
+  if bird.y > WINDOW_HEIGHT:
+    game_over = True
+    return
+  
   for pipe in pipes:
     pipe.x += velocity_x
+    
+    if not pipe.passed and bird.x > pipe.x + pipe_width:
+      score += 0.5
+      pipe.passed = True
+    
+    if bird.colliderect(pipe):
+      game_over = True
+      return
     
   while len(pipes) > 0 and pipes[0].x < -pipe_width:
     pipes.pop(0)
@@ -87,13 +125,24 @@ while running:
     if event.type == pygame.QUIT:
       running = False 
       
-    if event.type == create_pipes_timer:
+    if event.type == create_pipes_timer and not game_over:
       create_pipes()
-  
-  move()
-  draw()
-  pygame.display.update()
-  clock.tick(60)
+      
+    if event.type == pygame.KEYDOWN:
+      if event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP):
+        velocity_y = -8
+        
+        if game_over:
+          bird.y = bird_y
+          pipes.clear()
+          score = 0 
+          game_over = False
+          
+  if not game_over:
+    move()
+    draw()
+    pygame.display.update()
+    clock.tick(60)
       
 pygame.quit()
 exit()
