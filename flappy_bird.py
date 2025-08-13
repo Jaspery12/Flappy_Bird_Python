@@ -48,17 +48,30 @@ velocity_y = 0
 gravity = 0.4
 score = 0
 game_over = False
+background_x1 = 0
+background_x2 = WINDOW_WIDTH
 
 def draw():
-  window.blit(background_image, (0,0))
+  global background_x1, background_x2
+  
+  window.blit(background_image, (background_x1,0))
+  window.blit(background_image, (background_x2,0))
   window.blit(bird.img, bird)
+  
+  background_x1 += velocity_x
+  background_x2 += velocity_x
+  
+  if background_x1 <= -WINDOW_WIDTH:
+    background_x1 = WINDOW_WIDTH
+  if background_x2 <= -WINDOW_WIDTH:
+    background_x2 = WINDOW_WIDTH
   
   for pipe in pipes:
     window.blit(pipe.img, pipe)
   if game_over:
     game_over_str = "Game Over!"
     text_str = "You Scored: " + str(int(score)) 
-    retry_str = "Press space to retry"
+    retry_str = "Press SPACE to retry"
     text_font = pygame.font.SysFont("Comic Sans MS", 35)
     gameover_render = text_font.render(game_over_str, True, "red")
     text_render = text_font.render(text_str, True, "white")
